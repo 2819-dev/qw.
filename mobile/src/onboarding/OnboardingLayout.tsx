@@ -10,6 +10,7 @@ interface OnboardingLayoutProps {
   eyebrow: string;
   title: string;
   subtitle?: string;
+  header?: ReactNode;
   children?: ReactNode;
   onBack?: () => void;
   onContinue: () => void;
@@ -24,6 +25,7 @@ export default function OnboardingLayout({
   eyebrow,
   title,
   subtitle,
+  header,
   children,
   onBack,
   onContinue,
@@ -49,6 +51,7 @@ export default function OnboardingLayout({
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+          {header}
           <Text style={[styles.eyebrow, { color: theme.accent }]}>{eyebrow}</Text>
           <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
           {subtitle ? <Text style={[styles.subtitle, { color: theme.textMuted }]}>{subtitle}</Text> : null}

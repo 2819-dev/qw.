@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Share, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { WebView, type WebViewNavigation } from "react-native-webview";
 import { useAppStore } from "../state/appStore";
@@ -7,6 +7,7 @@ import { useTheme } from "../theme/useTheme";
 import AddressBar from "./AddressBar";
 import { normalizeUrl } from "./urls";
 import { getElapsedTrialDays, hasTrialEnded, TRIAL_LENGTH_DAYS } from "../state/trial";
+import type { ToolbarButtonId } from "../state/types";
 
 function trialLabel(status: string, elapsed: number, ended: boolean): string {
   if (status === "subscribed") return "qw Pro";
@@ -21,6 +22,7 @@ export default function BrowserShell() {
   const webviewRef = useRef<WebView<object>>(null);
   const [url, setUrl] = useState(prefs.homepage);
   const [nav, setNav] = useState({ canGoBack: false, canGoForward: false });
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
 
   const elapsed = getElapsedTrialDays(trial);
   const ended = hasTrialEnded(trial);
@@ -31,21 +33,50 @@ export default function BrowserShell() {
     setNav({ canGoBack: navState.canGoBack, canGoForward: navState.canGoForward });
   }
 
+  function navigateTo(target: string) {
+    setUrl(target);
+    webviewRef.current?.injectJavaScript(`window.location.href = ${JSON.stringify(target)}; true;`);
+  }
+
+  function handleButtonPress(id: ToolbarButtonId) {
+    switch (id) {
+      case "back":
+        webviewRef.current?.goBack();
+        break;
+      case "forward":
+        webviewRef.current?.goForward();
+        break;
+      case "reload":
+        webviewRef.current?.reload();
+        break;
+      case "home":
+        navigateTo(prefs.homepage);
+        break;
+      case "share":
+        Share.share({ url, message: url }).catch(() => {});
+        break;
+      case "bookmark":
+        setBookmarks((prev) => {
+          const next = new Set(prev);
+          if (next.has(url)) next.delete(url);
+          else next.add(url);
+          return next;
+        });
+        break;
+    }
+  }
+
   const addressBar = (
     <AddressBar
       theme={theme}
       position={prefs.searchBarPosition}
       url={url}
-      onNavigate={(next) => {
-        const target = normalizeUrl(next);
-        setUrl(target);
-        webviewRef.current?.injectJavaScript(`window.location.href = ${JSON.stringify(target)}; true;`);
-      }}
-      onBack={() => webviewRef.current?.goBack()}
-      onForward={() => webviewRef.current?.goForward()}
-      onReload={() => webviewRef.current?.reload()}
+      onNavigate={(next) => navigateTo(normalizeUrl(next))}
+      buttons={prefs.toolbarButtons}
+      onButtonPress={handleButtonPress}
       canGoBack={nav.canGoBack}
       canGoForward={nav.canGoForward}
+      isBookmarked={bookmarks.has(url)}
       trialStatus={trial.status}
       trialLabel={label}
       onTrialPress={() => dispatch({ type: "SET_PHASE", phase: "paywall" })}

@@ -1,11 +1,18 @@
 export type SearchBarPosition = "top" | "bottom";
 export type ThemeMode = "light" | "dark" | "auto";
 export type TabLayout = "vertical" | "horizontal";
+export type ToolbarButtonId = "back" | "forward" | "reload" | "home" | "share" | "bookmark";
 
 export interface AccentColor {
   id: string;
   label: string;
   value: string;
+}
+
+export interface ToolbarButton {
+  id: ToolbarButtonId;
+  icon: string;
+  label: string;
 }
 
 export interface OnboardingPrefs {
@@ -14,6 +21,7 @@ export interface OnboardingPrefs {
   themeMode: ThemeMode;
   accentColor: AccentColor;
   tabLayout: TabLayout;
+  toolbarButtons: ToolbarButtonId[];
   homepage: string;
 }
 

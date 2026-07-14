@@ -1,11 +1,17 @@
 import { StyleSheet, Text, View } from "react-native";
 import OnboardingLayout from "../OnboardingLayout";
 import type { StepProps } from "./types";
+import { TOOLBAR_BUTTONS } from "../../state/defaults";
 
 export default function SummaryStep({ prefs, theme, stepIndex, stepCount, onNext, onBack }: StepProps) {
   const name = prefs.displayName.trim();
+  const toolbarLabel = prefs.toolbarButtons
+    .map((id) => TOOLBAR_BUTTONS.find((b) => b.id === id)?.label)
+    .filter(Boolean)
+    .join(", ");
   const rows: [string, string][] = [
     ["Search bar", prefs.searchBarPosition === "top" ? "Top" : "Bottom"],
+    ["Toolbar buttons", toolbarLabel],
     ["Theme", prefs.themeMode[0].toUpperCase() + prefs.themeMode.slice(1)],
     ["Accent", prefs.accentColor.label],
     ["Tabs", prefs.tabLayout === "vertical" ? "Tab drawer" : "Tab strip"],

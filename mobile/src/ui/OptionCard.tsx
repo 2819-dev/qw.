@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
 import type { Palette } from "../theme/useTheme";
 
@@ -7,10 +8,11 @@ interface OptionCardProps {
   desc: string;
   selected: boolean;
   onPress: () => void;
+  preview?: ReactNode;
   style?: object;
 }
 
-export default function OptionCard({ theme, title, desc, selected, onPress, style }: OptionCardProps) {
+export default function OptionCard({ theme, title, desc, selected, onPress, preview, style }: OptionCardProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -23,6 +25,7 @@ export default function OptionCard({ theme, title, desc, selected, onPress, styl
         style,
       ]}
     >
+      {preview}
       <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
       <Text style={[styles.desc, { color: theme.textMuted }]}>{desc}</Text>
     </Pressable>
