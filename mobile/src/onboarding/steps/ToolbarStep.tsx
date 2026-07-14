@@ -25,17 +25,11 @@ export default function ToolbarStep({ prefs, updatePrefs, theme, stepIndex, step
       stepCount={stepCount}
       eyebrow="Toolbar"
       title="Pick your toolbar buttons."
-      subtitle={`Choose ${MIN_TOOLBAR_BUTTONS}–${MAX_TOOLBAR_BUTTONS}. They'll show up in the order you tap them, right where you put your search bar.`}
+      subtitle={`Choose ${MIN_TOOLBAR_BUTTONS}–${MAX_TOOLBAR_BUTTONS}. They'll show up in the order you tap them, next to your search bar.`}
       onBack={onBack}
       onContinue={onNext}
     >
-      <View
-        style={[
-          styles.previewBar,
-          { backgroundColor: theme.bgElevated, borderColor: theme.border },
-          prefs.searchBarPosition === "bottom" && styles.previewBarReversed,
-        ]}
-      >
+      <View style={[styles.previewBar, { backgroundColor: theme.bgElevated, borderColor: theme.border }]}>
         {selected.map((id) => {
           const btn = TOOLBAR_BUTTONS.find((b) => b.id === id)!;
           return (
@@ -85,7 +79,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 22,
   },
-  previewBarReversed: { flexDirection: "row" },
   previewIcon: { width: 30, height: 30, borderRadius: 8, alignItems: "center", justifyContent: "center" },
   previewInput: { flex: 1, height: 26, borderRadius: 999, borderWidth: 1 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },

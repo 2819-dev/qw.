@@ -12,7 +12,7 @@ import {
 import { DEFAULT_STATE } from "./defaults";
 import type { AppPhase, OnboardingPrefs, PersistedState } from "./types";
 
-const STORAGE_KEY = "qw.state.v1";
+const STORAGE_KEY = "qw.state.v2";
 
 type Action =
   | { type: "HYDRATE"; state: PersistedState }

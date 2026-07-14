@@ -2,20 +2,20 @@ import type { ComponentType } from "react";
 import { useAppStore } from "../state/appStore";
 import { useTheme } from "../theme/useTheme";
 import WelcomeStep from "./steps/WelcomeStep";
-import SearchBarStep from "./steps/SearchBarStep";
-import ToolbarStep from "./steps/ToolbarStep";
+import LayoutStep from "./steps/LayoutStep";
+import SpacesStep from "./steps/SpacesStep";
 import ThemeStep from "./steps/ThemeStep";
-import TabLayoutStep from "./steps/TabLayoutStep";
+import ToolbarStep from "./steps/ToolbarStep";
 import PersonalizeStep from "./steps/PersonalizeStep";
 import SummaryStep from "./steps/SummaryStep";
 import type { StepProps } from "./steps/types";
 
 const STEPS: Array<ComponentType<StepProps>> = [
   WelcomeStep,
-  SearchBarStep,
-  ToolbarStep,
+  LayoutStep,
+  SpacesStep,
   ThemeStep,
-  TabLayoutStep,
+  ToolbarStep,
   PersonalizeStep,
   SummaryStep,
 ];

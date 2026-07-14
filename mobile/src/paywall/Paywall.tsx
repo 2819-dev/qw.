@@ -3,13 +3,15 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../state/appStore";
 import { useTheme } from "../theme/useTheme";
+import { activeSpace } from "../state/defaults";
+import BrowserPreview from "../ui/BrowserPreview";
 import TrialTimeline from "./TrialTimeline";
 
 const FEATURES = [
-  "Move the search bar anywhere",
-  "Unlimited custom themes & accents",
-  "Tab drawer or classic tab strip",
-  "Sync every setting across devices",
+  "Unlimited spaces & colors",
+  "Tab stacks that stay organized",
+  "Sidebar or top bar, your call",
+  "Sync every space across devices",
 ];
 
 type Plan = "monthly" | "yearly";
@@ -23,10 +25,20 @@ export default function Paywall() {
   return (
     <SafeAreaView style={[styles.flex, { backgroundColor: theme.bg }]} edges={["top", "bottom"]}>
       <ScrollView contentContainerStyle={styles.scroll}>
+        <View style={styles.previewWrap}>
+          <BrowserPreview
+            theme={theme}
+            layout={state.prefs.layout}
+            space={activeSpace(state.prefs)}
+            spaces={state.prefs.spaces}
+            height={150}
+          />
+        </View>
+
         <Text style={[styles.eyebrow, { color: theme.accent }]}>Your qw is ready</Text>
         <Text style={[styles.title, { color: theme.text }]}>{name ? `Nicely done, ${name}.` : "Nicely done."}</Text>
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-          You've already set qw up exactly how you want it. Keep every Pro customization with a 7-day free
+          You've built your spaces exactly how you want them. Keep every Pro customization with a 7-day free
           trial — no charge today.
         </Text>
 
@@ -90,6 +102,7 @@ export default function Paywall() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   scroll: { padding: 24, paddingBottom: 40 },
+  previewWrap: { marginBottom: 20 },
   eyebrow: {
     fontSize: 12,
     fontWeight: "700",

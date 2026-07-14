@@ -1,21 +1,21 @@
 import { StyleSheet, Text, View } from "react-native";
 import OnboardingLayout from "../OnboardingLayout";
+import BrowserPreview from "../../ui/BrowserPreview";
+import { TOOLBAR_BUTTONS, activeSpace } from "../../state/defaults";
 import type { StepProps } from "./types";
-import { TOOLBAR_BUTTONS } from "../../state/defaults";
 
 export default function SummaryStep({ prefs, theme, stepIndex, stepCount, onNext, onBack }: StepProps) {
   const name = prefs.displayName.trim();
+  const space = activeSpace(prefs);
   const toolbarLabel = prefs.toolbarButtons
     .map((id) => TOOLBAR_BUTTONS.find((b) => b.id === id)?.label)
     .filter(Boolean)
     .join(", ");
   const rows: [string, string][] = [
-    ["Search bar", prefs.searchBarPosition === "top" ? "Top" : "Bottom"],
-    ["Toolbar buttons", toolbarLabel],
+    ["Layout", prefs.layout === "sidebar" ? "Sidebar" : "Top bar"],
+    ["Spaces", prefs.spaces.map((s) => `${s.emoji} ${s.name}`).join("  ")],
     ["Theme", prefs.themeMode[0].toUpperCase() + prefs.themeMode.slice(1)],
-    ["Accent", prefs.accentColor.label],
-    ["Tabs", prefs.tabLayout === "vertical" ? "Tab drawer" : "Tab strip"],
-    ["Homepage", prefs.homepage],
+    ["Toolbar", toolbarLabel],
   ];
 
   return (
@@ -25,7 +25,12 @@ export default function SummaryStep({ prefs, theme, stepIndex, stepCount, onNext
       stepCount={stepCount}
       eyebrow="All set"
       title={name ? `Here's your qw, ${name}.` : "Here's your qw."}
-      subtitle="Everything below applies the moment you continue."
+      subtitle="This is exactly what you'll drop into. Everything's editable later."
+      header={
+        <View style={{ marginBottom: 18 }}>
+          <BrowserPreview theme={theme} layout={prefs.layout} space={space} spaces={prefs.spaces} height={200} />
+        </View>
+      }
       onBack={onBack}
       onContinue={onNext}
       continueLabel="Finish setup"
@@ -33,7 +38,9 @@ export default function SummaryStep({ prefs, theme, stepIndex, stepCount, onNext
       {rows.map(([label, value]) => (
         <View key={label} style={[styles.row, { backgroundColor: theme.bgElevated, borderColor: theme.border }]}>
           <Text style={[styles.label, { color: theme.textMuted }]}>{label}</Text>
-          <Text style={[styles.value, { color: theme.text }]}>{value}</Text>
+          <Text style={[styles.value, { color: theme.text }]} numberOfLines={1}>
+            {value}
+          </Text>
         </View>
       ))}
     </OnboardingLayout>
@@ -44,11 +51,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
     marginBottom: 10,
   },
   label: { fontSize: 14 },
-  value: { fontSize: 14, fontWeight: "600" },
+  value: { fontSize: 14, fontWeight: "600", flexShrink: 1, textAlign: "right" },
 });

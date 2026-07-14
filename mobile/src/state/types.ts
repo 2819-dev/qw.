@@ -1,13 +1,6 @@
-export type SearchBarPosition = "top" | "bottom";
 export type ThemeMode = "light" | "dark" | "auto";
-export type TabLayout = "vertical" | "horizontal";
+export type BrowserLayout = "sidebar" | "topbar";
 export type ToolbarButtonId = "back" | "forward" | "reload" | "home" | "share" | "bookmark";
-
-export interface AccentColor {
-  id: string;
-  label: string;
-  value: string;
-}
 
 export interface ToolbarButton {
   id: ToolbarButtonId;
@@ -15,14 +8,31 @@ export interface ToolbarButton {
   label: string;
 }
 
+/** A Zen-style "space": a colored, named context that recolors the whole browser. */
+export interface Space {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  homepage: string;
+}
+
+/** A tab living inside a space. `stack` groups tabs into a collapsible stack. */
+export interface Tab {
+  id: string;
+  title: string;
+  url: string;
+  pinned: boolean;
+  stack?: string;
+}
+
 export interface OnboardingPrefs {
   displayName: string;
-  searchBarPosition: SearchBarPosition;
+  layout: BrowserLayout;
   themeMode: ThemeMode;
-  accentColor: AccentColor;
-  tabLayout: TabLayout;
+  spaces: Space[];
+  activeSpaceId: string;
   toolbarButtons: ToolbarButtonId[];
-  homepage: string;
 }
 
 export type AppPhase = "onboarding" | "paywall" | "browser";

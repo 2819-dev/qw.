@@ -1,5 +1,7 @@
+import { View } from "react-native";
 import OnboardingLayout from "../OnboardingLayout";
-import HeroIllustration from "../HeroIllustration";
+import BrowserPreview from "../../ui/BrowserPreview";
+import { activeSpace } from "../../state/defaults";
 import type { StepProps } from "./types";
 
 export default function WelcomeStep({ prefs, theme, stepIndex, stepCount, onNext }: StepProps) {
@@ -9,9 +11,19 @@ export default function WelcomeStep({ prefs, theme, stepIndex, stepCount, onNext
       stepIndex={stepIndex}
       stepCount={stepCount}
       eyebrow="Welcome to qw."
-      title="Let's make this browser yours."
-      subtitle="A couple of quick choices and qw will feel like it was built around the way you actually browse — not the other way around. Takes about a minute."
-      header={<HeroIllustration theme={theme} accentColor={prefs.accentColor} />}
+      title="A browser that bends to you."
+      subtitle="Spaces, tab stacks, your own layout and colors. Let's set up a qw that works the way your brain does — takes about a minute."
+      header={
+        <View style={{ marginBottom: 4 }}>
+          <BrowserPreview
+            theme={theme}
+            layout={prefs.layout}
+            space={activeSpace(prefs)}
+            spaces={prefs.spaces}
+            height={210}
+          />
+        </View>
+      }
       onContinue={onNext}
       continueLabel="Let's go"
     />

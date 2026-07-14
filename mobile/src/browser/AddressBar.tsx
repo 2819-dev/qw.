@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import type { SearchBarPosition, ToolbarButtonId, TrialStatus } from "../state/types";
+import type { ToolbarButtonId, TrialStatus } from "../state/types";
 import type { Palette } from "../theme/useTheme";
 import { TOOLBAR_BUTTONS } from "../state/defaults";
 
 interface AddressBarProps {
   theme: Palette;
-  position: SearchBarPosition;
   url: string;
   onNavigate: (url: string) => void;
   buttons: ToolbarButtonId[];
@@ -21,7 +20,6 @@ interface AddressBarProps {
 
 export default function AddressBar({
   theme,
-  position,
   url,
   onNavigate,
   buttons,
@@ -48,13 +46,7 @@ export default function AddressBar({
   }
 
   return (
-    <View
-      style={[
-        styles.bar,
-        { backgroundColor: theme.bgElevated, borderColor: theme.border },
-        position === "top" ? styles.borderBottom : styles.borderTop,
-      ]}
-    >
+    <View style={[styles.bar, { backgroundColor: theme.bgElevated }]}>
       {buttons.map((id) => {
         const disabled = isDisabled(id);
         return (
@@ -103,12 +95,10 @@ export default function AddressBar({
 }
 
 const styles = StyleSheet.create({
-  bar: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 8 },
-  borderBottom: { borderBottomWidth: 1 },
-  borderTop: { borderTopWidth: 1 },
-  icon: { width: 26, height: 28, alignItems: "center", justifyContent: "center" },
+  bar: { flexDirection: "row", alignItems: "center", gap: 2, paddingHorizontal: 6, paddingVertical: 8 },
+  icon: { width: 22, height: 28, alignItems: "center", justifyContent: "center" },
   iconText: { fontSize: 16 },
-  input: { flex: 1, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, fontSize: 13.5 },
-  pill: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6, maxWidth: 110 },
-  pillText: { fontSize: 10.5, fontWeight: "700" },
+  input: { flex: 1, minWidth: 0, borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 7, fontSize: 13, marginHorizontal: 2 },
+  pill: { flexShrink: 0, borderWidth: 1, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 6, maxWidth: 76 },
+  pillText: { fontSize: 10, fontWeight: "700" },
 });

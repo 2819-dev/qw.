@@ -7,13 +7,18 @@ version (`../electron`, `../src`) is a separate, later phase of the same product
 
 ## What's here
 
-Same shape as the desktop app, ported to React Native:
+A Zen-inspired experience built around **spaces** — each a named, colored context (Work, Study, Personal…)
+that recolors the whole browser — plus **tab stacks** and a choice of **sidebar or top bar**.
 
-- `src/onboarding/` — search bar position, theme/accent, tabs, personalize, summary
-- `src/paywall/` — premium upsell with the day 1 / day 5 / day 7 trial timeline and an honest free exit
-- `src/browser/` — address bar (top or bottom, per your onboarding choice) + `react-native-webview`
+- `src/onboarding/` — welcome, layout (sidebar/top bar), spaces, appearance, toolbar, personalize, summary.
+  Every step shows a live realistic mini-browser (`src/ui/BrowserPreview.tsx`) that reflects the choice, so
+  people see how it actually looks instead of picking from abstract swatches.
+- `src/paywall/` — premium upsell with the day 1 / day 5 / day 7 trial timeline and an honest free exit.
+- `src/browser/` — the real shell: space switcher, essentials + tab stacks (`TabList`), a floating rounded
+  page area, and `react-native-webview`. The accent follows the active space.
 
-State persists via `@react-native-async-storage/async-storage`.
+Theme accent is derived from the active space's color (`src/theme/useTheme.ts`). State persists via
+`@react-native-async-storage/async-storage` (key `qw.state.v2`).
 
 ## Running it — free, no Apple Developer account needed
 

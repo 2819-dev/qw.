@@ -1,9 +1,11 @@
 import { useColorScheme } from "react-native";
-import type { OnboardingPrefs } from "../state/types";
+import { activeSpace } from "../state/defaults";
+import type { OnboardingPrefs, ThemeMode } from "../state/types";
 
 export interface Palette {
   accent: string;
   accentSoft: string;
+  accentGlow: string;
   bg: string;
   bgElevated: string;
   bgElevated2: string;
@@ -14,7 +16,7 @@ export interface Palette {
   isDark: boolean;
 }
 
-const DARK: Omit<Palette, "accent" | "accentSoft" | "isDark"> = {
+const DARK: Omit<Palette, "accent" | "accentSoft" | "accentGlow" | "isDark"> = {
   bg: "#0b0b0f",
   bgElevated: "#17171f",
   bgElevated2: "#1f1f2a",
@@ -24,7 +26,7 @@ const DARK: Omit<Palette, "accent" | "accentSoft" | "isDark"> = {
   textFaint: "rgba(242,242,247,0.4)",
 };
 
-const LIGHT: Omit<Palette, "accent" | "accentSoft" | "isDark"> = {
+const LIGHT: Omit<Palette, "accent" | "accentSoft" | "accentGlow" | "isDark"> = {
   bg: "#f4f4f8",
   bgElevated: "#ffffff",
   bgElevated2: "#f0f0f5",
@@ -42,14 +44,20 @@ function withAlpha(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-export function useTheme(prefs: OnboardingPrefs): Palette {
-  const systemScheme = useColorScheme();
-  const resolvedDark = prefs.themeMode === "auto" ? systemScheme !== "light" : prefs.themeMode === "dark";
+/** Build a palette for an explicit accent + theme mode (used by previews for arbitrary spaces). */
+export function paletteFor(accent: string, themeMode: ThemeMode, systemDark: boolean): Palette {
+  const resolvedDark = themeMode === "auto" ? systemDark : themeMode === "dark";
   const base = resolvedDark ? DARK : LIGHT;
   return {
     ...base,
-    accent: prefs.accentColor.value,
-    accentSoft: withAlpha(prefs.accentColor.value, resolvedDark ? 0.16 : 0.12),
+    accent,
+    accentSoft: withAlpha(accent, resolvedDark ? 0.18 : 0.12),
+    accentGlow: withAlpha(accent, resolvedDark ? 0.28 : 0.2),
     isDark: resolvedDark,
   };
+}
+
+export function useTheme(prefs: OnboardingPrefs): Palette {
+  const systemScheme = useColorScheme();
+  return paletteFor(activeSpace(prefs).color, prefs.themeMode, systemScheme !== "light");
 }
