@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
   useContext,
@@ -9,6 +8,7 @@ import {
   type Dispatch,
   type ReactNode,
 } from "react";
+import { getItem, setItem } from "./storage";
 import { DEFAULT_STATE } from "./defaults";
 import type { AppPhase, OnboardingPrefs, PersistedState } from "./types";
 
@@ -66,7 +66,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
+    getItem(STORAGE_KEY)
       .then((raw) => {
         if (raw) {
           const parsed = JSON.parse(raw) as PersistedState;
@@ -76,12 +76,13 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           });
         }
       })
+      .catch(() => {})
       .finally(() => setHydrated(true));
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    void setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state, hydrated]);
 
   const value = useMemo(() => ({ state, dispatch }), [state]);
