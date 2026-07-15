@@ -1,21 +1,16 @@
 import { StyleSheet, Text, View } from "react-native";
 import OnboardingLayout from "../OnboardingLayout";
 import PhonePreview from "../../ui/PhonePreview";
-import { TOOLBAR_BUTTONS, activeSpace } from "../../state/defaults";
+import { activeSpace } from "../../state/defaults";
 import type { StepProps } from "./types";
 
 export default function SummaryStep({ prefs, theme, stepIndex, stepCount, onNext, onBack }: StepProps) {
   const name = prefs.displayName.trim();
   const space = activeSpace(prefs);
-  const toolbarLabel = prefs.toolbarButtons
-    .map((id) => TOOLBAR_BUTTONS.find((b) => b.id === id)?.label)
-    .filter(Boolean)
-    .join(", ");
   const rows: [string, string][] = [
     ["Search bar", prefs.barPosition === "top" ? "Top" : "Bottom"],
     ["Spaces", prefs.spaces.map((s) => `${s.emoji} ${s.name}`).join("  ")],
     ["Theme", prefs.themeMode[0].toUpperCase() + prefs.themeMode.slice(1)],
-    ["Toolbar", toolbarLabel],
   ];
 
   return (

@@ -4,7 +4,6 @@ import { useTheme } from "../theme/useTheme";
 import WelcomeStep from "./steps/WelcomeStep";
 import BarPositionStep from "./steps/BarPositionStep";
 import ThemeStep from "./steps/ThemeStep";
-import ToolbarStep from "./steps/ToolbarStep";
 import PersonalizeStep from "./steps/PersonalizeStep";
 import SummaryStep from "./steps/SummaryStep";
 import type { StepProps } from "./steps/types";
@@ -13,7 +12,6 @@ const STEPS: Array<ComponentType<StepProps>> = [
   WelcomeStep,
   BarPositionStep,
   ThemeStep,
-  ToolbarStep,
   PersonalizeStep,
   SummaryStep,
 ];

@@ -15,39 +15,34 @@ interface PhonePreviewProps {
 }
 
 /**
- * A realistic PORTRAIT phone mockup — the browser as it actually appears on a phone.
- * The new-tab page is deliberately minimal (wallpaper + a faint qw.), just like the real app.
+ * A realistic PORTRAIT phone mockup of the actual Safari-style browser: top search bar
+ * (with mic), a minimalist new-tab page, and a bottom toolbar. Basically a live screenshot.
  */
 export default function PhonePreview({
   theme,
   barPosition,
   space,
-  spaces,
+  spaces: _spaces,
   wallpaperId = "auto",
   height = 250,
 }: PhonePreviewProps) {
   const width = Math.round(height * 0.49);
-  const bar = <Chrome theme={theme} space={space} spaces={spaces} />;
+  const searchBar = <MiniSearch theme={theme} />;
 
   return (
     <View style={styles.center}>
       <View
         style={[
           styles.body,
-          {
-            width,
-            height,
-            borderRadius: width * 0.24,
-            backgroundColor: "#050506",
-            shadowColor: space.color,
-          },
+          { width, height, borderRadius: width * 0.24, backgroundColor: "#050506", shadowColor: space.color },
         ]}
       >
         <View style={[styles.screen, { borderRadius: width * 0.2, backgroundColor: theme.bg }]}>
           <StatusBar theme={theme} />
-          {barPosition === "top" && bar}
+          {barPosition === "top" && searchBar}
           <Page theme={theme} wallpaperId={wallpaperId} />
-          {barPosition === "bottom" && bar}
+          {barPosition === "bottom" && searchBar}
+          <MiniToolbar theme={theme} accent={space.color} />
           <View style={styles.homeRow}>
             <View style={[styles.home, { backgroundColor: theme.textFaint }]} />
           </View>
@@ -67,32 +62,27 @@ function StatusBar({ theme }: { theme: Palette }) {
   );
 }
 
-function Chrome({ theme, space, spaces }: { theme: Palette; space: Space; spaces: Space[] }) {
+function MiniSearch({ theme }: { theme: Palette }) {
   return (
-    <View style={styles.chrome}>
-      <View style={styles.spacesRow}>
-        {spaces.slice(0, 4).map((s) => {
-          const active = s.id === space.id;
-          return (
-            <View
-              key={s.id}
-              style={[
-                styles.spaceDot,
-                { backgroundColor: active ? space.color : theme.bgElevated2, borderColor: active ? space.color : "transparent" },
-              ]}
-            >
-              <Text style={styles.spaceEmoji}>{s.emoji}</Text>
-            </View>
-          );
-        })}
+    <View style={styles.searchRow}>
+      <View style={[styles.searchField, { backgroundColor: theme.bgElevated, borderColor: theme.border }]}>
+        <Text style={[styles.searchGlyph, { color: theme.textMuted }]}>⌕</Text>
+        <View style={[styles.searchLine, { backgroundColor: theme.textFaint }]} />
+        <Text style={[styles.micGlyph, { color: theme.textMuted }]}>🎤</Text>
       </View>
-      <View style={styles.addressRow}>
-        <View style={[styles.addressPill, { backgroundColor: theme.bgElevated }]}>
-          <View style={[styles.addressLine, { backgroundColor: theme.textFaint }]} />
-        </View>
-        <View style={[styles.tabsBtn, { backgroundColor: theme.bgElevated, borderColor: theme.border }]}>
-          <View style={[styles.tabsSquare, { borderColor: theme.textMuted }]} />
-        </View>
+    </View>
+  );
+}
+
+function MiniToolbar({ theme, accent }: { theme: Palette; accent: string }) {
+  return (
+    <View style={[styles.toolbar, { borderTopColor: theme.border }]}>
+      <Text style={[styles.tbGlyph, { color: theme.text }]}>‹</Text>
+      <Text style={[styles.tbGlyph, { color: theme.textFaint }]}>›</Text>
+      <Text style={[styles.tbShare, { color: theme.text }]}>↑</Text>
+      <Text style={[styles.tbGlyph, { color: theme.text }]}>☆</Text>
+      <View style={[styles.tbTabs, { borderColor: theme.text }]}>
+        <View style={[styles.tbTabsDot, { backgroundColor: accent }]} />
       </View>
     </View>
   );
@@ -130,18 +120,20 @@ const styles = StyleSheet.create({
   statusSide: { width: 12, height: 3, borderRadius: 2, opacity: 0.7 },
   island: { width: 26, height: 8, borderRadius: 5, backgroundColor: "#050506" },
 
-  chrome: { paddingHorizontal: 8, paddingVertical: 6, gap: 6 },
-  spacesRow: { flexDirection: "row", gap: 5, justifyContent: "center" },
-  spaceDot: { width: 16, height: 16, borderRadius: 8, borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
-  spaceEmoji: { fontSize: 9 },
-  addressRow: { flexDirection: "row", alignItems: "center", gap: 5 },
-  addressPill: { flex: 1, height: 20, borderRadius: 999, flexDirection: "row", alignItems: "center", paddingHorizontal: 8 },
-  addressLine: { flex: 1, height: 3, borderRadius: 2, maxWidth: "70%" },
-  tabsBtn: { width: 20, height: 20, borderRadius: 6, borderWidth: 1, alignItems: "center", justifyContent: "center" },
-  tabsSquare: { width: 9, height: 9, borderRadius: 2.5, borderWidth: 1.5 },
+  searchRow: { paddingHorizontal: 8, paddingVertical: 5 },
+  searchField: { flexDirection: "row", alignItems: "center", height: 20, borderRadius: 8, borderWidth: 1, paddingHorizontal: 6, gap: 5 },
+  searchGlyph: { fontSize: 11, fontWeight: "700" },
+  searchLine: { flex: 1, height: 3, borderRadius: 2, maxWidth: "60%" },
+  micGlyph: { fontSize: 9 },
 
-  page: { flex: 1, margin: 6, borderRadius: 12, overflow: "hidden" },
+  page: { flex: 1, marginHorizontal: 6, borderRadius: 12, overflow: "hidden" },
   pageCenter: { flex: 1, alignItems: "center", justifyContent: "center" },
+
+  toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-around", paddingVertical: 5, marginTop: 5, borderTopWidth: StyleSheet.hairlineWidth },
+  tbGlyph: { fontSize: 15, fontWeight: "500" },
+  tbShare: { fontSize: 12, fontWeight: "700" },
+  tbTabs: { width: 12, height: 12, borderRadius: 3, borderWidth: 1.5, alignItems: "center", justifyContent: "center" },
+  tbTabsDot: { width: 4, height: 4, borderRadius: 2 },
 
   homeRow: { alignItems: "center", paddingBottom: 5, paddingTop: 2 },
   home: { width: "30%", height: 3.5, borderRadius: 2 },

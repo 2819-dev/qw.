@@ -5,6 +5,7 @@ import { WebView, type WebViewNavigation } from "react-native-webview";
 import { useAppStore } from "../state/appStore";
 import { useTheme } from "../theme/useTheme";
 import AddressBar from "./AddressBar";
+import BottomToolbar from "./BottomToolbar";
 import TabOverview from "./TabOverview";
 import Settings from "../settings/Settings";
 import SpaceEditor from "./SpaceEditor";
@@ -19,6 +20,15 @@ function trialLabel(status: string, elapsed: number, ended: boolean): string {
   if (status === "trialing") return ended ? "Trial ended" : `${TRIAL_LENGTH_DAYS - elapsed}d left`;
   return "Upgrade";
 }
+
+const PRIVATE_ID = "__private__";
+const PRIVATE_SPACE: Space = {
+  id: PRIVATE_ID,
+  name: "Private",
+  emoji: "🕶️",
+  color: "#9a9aa2",
+  homepage: NEW_TAB_URL,
+};
 
 export default function BrowserShell() {
   const { state, dispatch } = useAppStore();
@@ -42,9 +52,13 @@ export default function BrowserShell() {
   const [tabSheetOpen, setTabSheetOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null);
+  const [privateMode, setPrivateMode] = useState(false);
 
-  const tabs = tabsBySpace[space.id] ?? [];
-  const activeTabId = activeTabBySpace[space.id] ?? tabs[0]?.id ?? "";
+  // The active "group" is either a space or the ephemeral Private group.
+  const group = privateMode ? PRIVATE_SPACE : space;
+  const key = group.id;
+  const tabs = tabsBySpace[key] ?? [];
+  const activeTabId = activeTabBySpace[key] ?? tabs[0]?.id ?? "";
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
   const onNewTab = activeTab?.url === NEW_TAB_URL;
 
@@ -54,12 +68,22 @@ export default function BrowserShell() {
   function patchTab(tabId: string, patch: Partial<Tab>) {
     setTabsBySpace((prev) => ({
       ...prev,
-      [space.id]: (prev[space.id] ?? []).map((t) => (t.id === tabId ? { ...t, ...patch } : t)),
+      [key]: (prev[key] ?? []).map((t) => (t.id === tabId ? { ...t, ...patch } : t)),
     }));
   }
 
-  function switchSpace(id: string) {
-    dispatch({ type: "UPDATE_PREFS", prefs: { activeSpaceId: id } });
+  function selectGroup(id: string) {
+    if (id === PRIVATE_ID) {
+      setTabsBySpace((prev) => {
+        if (prev[PRIVATE_ID]?.length) return prev;
+        return { ...prev, [PRIVATE_ID]: [{ id: "pv-new", title: "New Tab", url: NEW_TAB_URL, pinned: false }] };
+      });
+      setActiveTabBySpace((prev) => (prev[PRIVATE_ID] ? prev : { ...prev, [PRIVATE_ID]: "pv-new" }));
+      setPrivateMode(true);
+    } else {
+      setPrivateMode(false);
+      dispatch({ type: "UPDATE_PREFS", prefs: { activeSpaceId: id } });
+    }
   }
 
   function addSpace() {
@@ -98,25 +122,25 @@ export default function BrowserShell() {
   }
 
   function switchTab(id: string) {
-    setActiveTabBySpace((prev) => ({ ...prev, [space.id]: id }));
+    setActiveTabBySpace((prev) => ({ ...prev, [key]: id }));
   }
 
   function newTab() {
-    const id = `${space.id}-n${Date.now()}`;
+    const id = `${key}-n${Date.now()}`;
     const tab: Tab = { id, title: "New Tab", url: NEW_TAB_URL, pinned: false };
-    setTabsBySpace((prev) => ({ ...prev, [space.id]: [...(prev[space.id] ?? []), tab] }));
-    setActiveTabBySpace((prev) => ({ ...prev, [space.id]: id }));
+    setTabsBySpace((prev) => ({ ...prev, [key]: [...(prev[key] ?? []), tab] }));
+    setActiveTabBySpace((prev) => ({ ...prev, [key]: id }));
   }
 
   function closeTab(id: string) {
     let remaining = tabs.filter((t) => t.id !== id);
-    // Never leave a space with zero tabs — open a fresh new tab, Safari-style.
+    // Never leave a group with zero tabs — open a fresh new tab, Safari-style.
     if (remaining.length === 0) {
-      remaining = [{ id: `${space.id}-n${Date.now()}`, title: "New Tab", url: NEW_TAB_URL, pinned: false }];
+      remaining = [{ id: `${key}-n${Date.now()}`, title: "New Tab", url: NEW_TAB_URL, pinned: false }];
     }
-    setTabsBySpace((prev) => ({ ...prev, [space.id]: remaining }));
+    setTabsBySpace((prev) => ({ ...prev, [key]: remaining }));
     if (activeTabId === id) {
-      setActiveTabBySpace((prev) => ({ ...prev, [space.id]: remaining[0].id }));
+      setActiveTabBySpace((prev) => ({ ...prev, [key]: remaining[0].id }));
     }
   }
 
@@ -149,7 +173,7 @@ export default function BrowserShell() {
         webviewRef.current?.reload();
         break;
       case "home":
-        navigateActive(space.homepage);
+        navigateActive(group.homepage);
         break;
       case "share":
         if (activeTab) Share.share({ url: activeTab.url, message: activeTab.url }).catch(() => {});
@@ -166,34 +190,36 @@ export default function BrowserShell() {
     }
   }
 
-  const chrome = (
-    <View style={styles.chrome}>
-      {activeTab && (
-        <AddressBar
-          theme={theme}
-          url={onNewTab ? "" : activeTab.url}
-          onNavigate={(next) => navigateActive(normalizeUrl(next))}
-          buttons={prefs.toolbarButtons}
-          onButtonPress={onButton}
-          canGoBack={nav.canGoBack}
-          canGoForward={nav.canGoForward}
-          isBookmarked={activeTab ? bookmarks.has(activeTab.url) : false}
-          tabCount={tabs.length}
-          onTabsPress={() => setTabSheetOpen(true)}
-        />
-      )}
-    </View>
+  const searchBar = activeTab && (
+    <AddressBar theme={theme} url={onNewTab ? "" : activeTab.url} onNavigate={(next) => navigateActive(normalizeUrl(next))} />
+  );
+
+  const bottomToolbar = (
+    <BottomToolbar
+      theme={theme}
+      accent={group.color}
+      canGoBack={nav.canGoBack}
+      canGoForward={nav.canGoForward}
+      isBookmarked={activeTab ? bookmarks.has(activeTab.url) : false}
+      tabCount={tabs.length}
+      onBack={() => onButton("back")}
+      onForward={() => onButton("forward")}
+      onShare={() => onButton("share")}
+      onBookmark={() => onButton("bookmark")}
+      onTabs={() => setTabSheetOpen(true)}
+      onNewTab={newTab}
+    />
   );
 
   const page = (
     <View style={styles.pageWrap}>
-      <View style={[styles.pageCard, { backgroundColor: theme.bg, borderColor: theme.border, shadowColor: space.color }]}>
+      <View style={[styles.pageCard, { backgroundColor: theme.bg, borderColor: theme.border, shadowColor: group.color }]}>
         {activeTab &&
           (onNewTab ? (
             <NewTabPage theme={theme} wallpaperId={prefs.newTabWallpaperId} />
           ) : (
             <WebView<object>
-              key={`${space.id}:${activeTab.id}`}
+              key={`${key}:${activeTab.id}`}
               ref={webviewRef}
               source={{ uri: activeTab.url }}
               style={styles.flex}
@@ -208,22 +234,23 @@ export default function BrowserShell() {
     <SafeAreaView style={[styles.flex, { backgroundColor: theme.bg }]} edges={["top", "bottom"]}>
       {prefs.barPosition === "top" ? (
         <>
-          {chrome}
+          {searchBar}
           {page}
         </>
       ) : (
         <>
           {page}
-          {chrome}
+          {searchBar}
         </>
       )}
+      {bottomToolbar}
 
       {activeTab && (
         <TabOverview
           visible={tabSheetOpen}
           theme={theme}
-          spaces={prefs.spaces}
-          activeSpace={space}
+          groups={[PRIVATE_SPACE, ...prefs.spaces]}
+          activeGroup={group}
           tabs={tabs}
           activeTabId={activeTabId}
           wallpaperId={prefs.newTabWallpaperId}
@@ -232,15 +259,12 @@ export default function BrowserShell() {
           onSelectTab={switchTab}
           onCloseTab={closeTab}
           onNewTab={newTab}
-          onSwitchSpace={switchSpace}
+          onSelectGroup={selectGroup}
           onAddSpace={() => {
             setTabSheetOpen(false);
             addSpace();
           }}
-          onEditSpace={(id) => {
-            setTabSheetOpen(false);
-            setEditingSpaceId(id);
-          }}
+          onEditSpace={setEditingSpaceId}
           onSettings={() => {
             setTabSheetOpen(false);
             setSettingsOpen(true);
