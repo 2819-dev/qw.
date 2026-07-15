@@ -1,5 +1,5 @@
 export type ThemeMode = "light" | "dark" | "auto";
-export type BrowserLayout = "sidebar" | "topbar";
+export type BarPosition = "top" | "bottom";
 export type ToolbarButtonId = "back" | "forward" | "reload" | "home" | "share" | "bookmark";
 
 export interface ToolbarButton {
@@ -28,7 +28,7 @@ export interface Tab {
 
 export interface OnboardingPrefs {
   displayName: string;
-  layout: BrowserLayout;
+  barPosition: BarPosition;
   themeMode: ThemeMode;
   spaces: Space[];
   activeSpaceId: string;

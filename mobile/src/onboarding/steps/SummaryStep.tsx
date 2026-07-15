@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import OnboardingLayout from "../OnboardingLayout";
-import BrowserPreview from "../../ui/BrowserPreview";
+import PhonePreview from "../../ui/PhonePreview";
 import { TOOLBAR_BUTTONS, activeSpace } from "../../state/defaults";
 import type { StepProps } from "./types";
 
@@ -12,7 +12,7 @@ export default function SummaryStep({ prefs, theme, stepIndex, stepCount, onNext
     .filter(Boolean)
     .join(", ");
   const rows: [string, string][] = [
-    ["Layout", prefs.layout === "sidebar" ? "Sidebar" : "Top bar"],
+    ["Search bar", prefs.barPosition === "top" ? "Top" : "Bottom"],
     ["Spaces", prefs.spaces.map((s) => `${s.emoji} ${s.name}`).join("  ")],
     ["Theme", prefs.themeMode[0].toUpperCase() + prefs.themeMode.slice(1)],
     ["Toolbar", toolbarLabel],
@@ -27,8 +27,8 @@ export default function SummaryStep({ prefs, theme, stepIndex, stepCount, onNext
       title={name ? `Here's your qw, ${name}.` : "Here's your qw."}
       subtitle="This is exactly what you'll drop into. Everything's editable later."
       header={
-        <View style={{ marginBottom: 18 }}>
-          <BrowserPreview theme={theme} layout={prefs.layout} space={space} spaces={prefs.spaces} height={200} />
+        <View style={{ alignItems: "center", marginBottom: 20 }}>
+          <PhonePreview theme={theme} barPosition={prefs.barPosition} space={space} spaces={prefs.spaces} height={244} />
         </View>
       }
       onBack={onBack}

@@ -2,12 +2,13 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { ReactNode } from "react";
 import type { Palette } from "../theme/useTheme";
+import Wordmark from "../ui/Wordmark";
 
 interface OnboardingLayoutProps {
   theme: Palette;
   stepIndex: number;
   stepCount: number;
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   subtitle?: string;
   header?: ReactNode;
@@ -35,47 +36,50 @@ export default function OnboardingLayout({
   return (
     <SafeAreaView style={[styles.flex, { backgroundColor: theme.bg }]} edges={["top", "bottom"]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <View style={styles.progressRow}>
-          {Array.from({ length: stepCount }).map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                {
-                  backgroundColor:
-                    i === stepIndex ? theme.accent : i < stepIndex ? theme.accentSoft : theme.border,
-                },
-              ]}
-            />
-          ))}
+        {/* header: back · wordmark · segmented progress */}
+        <View style={styles.topBar}>
+          {onBack ? (
+            <Pressable onPress={onBack} hitSlop={12} style={styles.backBtn}>
+              <Text style={[styles.backChevron, { color: theme.text }]}>‹</Text>
+            </Pressable>
+          ) : (
+            <Wordmark size={20} color={theme.text} dotColor={theme.accent} />
+          )}
+          <View style={styles.progress}>
+            {Array.from({ length: stepCount }).map((_, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.seg,
+                  {
+                    backgroundColor: i <= stepIndex ? theme.accent : theme.border,
+                    width: i === stepIndex ? 20 : 7,
+                  },
+                ]}
+              />
+            ))}
+          </View>
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           {header}
-          <Text style={[styles.eyebrow, { color: theme.accent }]}>{eyebrow}</Text>
+          {eyebrow ? <Text style={[styles.eyebrow, { color: theme.accent }]}>{eyebrow}</Text> : null}
           <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
           {subtitle ? <Text style={[styles.subtitle, { color: theme.textMuted }]}>{subtitle}</Text> : null}
-
           {children}
         </ScrollView>
 
-        <View style={styles.nav}>
-          {onBack ? (
-            <Pressable onPress={onBack} hitSlop={10}>
-              <Text style={[styles.back, { color: theme.textMuted }]}>Back</Text>
-            </Pressable>
-          ) : (
-            <View />
-          )}
+        <View style={styles.footer}>
           <Pressable
             onPress={onContinue}
             disabled={continueDisabled}
-            style={[
-              styles.continueBtn,
-              { backgroundColor: theme.accent, opacity: continueDisabled ? 0.4 : 1 },
-            ]}
+            style={[styles.cta, { backgroundColor: theme.accent, opacity: continueDisabled ? 0.35 : 1 }]}
           >
-            <Text style={styles.continueText}>{continueLabel}</Text>
+            <Text style={styles.ctaText}>{continueLabel}</Text>
           </Pressable>
         </View>
       </KeyboardAvoidingView>
@@ -85,32 +89,26 @@ export default function OnboardingLayout({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  progressRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 6,
-    paddingTop: 12,
-    paddingBottom: 4,
-  },
-  dot: { width: 26, height: 4, borderRadius: 2 },
-  scrollContent: { flexGrow: 1, padding: 24, paddingTop: 28 },
-  eyebrow: { fontSize: 12, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 },
-  title: { fontSize: 26, fontWeight: "700", marginBottom: 8, letterSpacing: -0.3 },
-  subtitle: { fontSize: 15, lineHeight: 21, marginBottom: 24 },
-  nav: {
+  topBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 24,
-    paddingBottom: 16,
     paddingTop: 8,
+    paddingBottom: 6,
+    minHeight: 40,
   },
-  back: { fontSize: 15, paddingVertical: 8 },
-  continueBtn: {
-    marginLeft: "auto",
-    paddingVertical: 15,
-    paddingHorizontal: 28,
-    borderRadius: 999,
-  },
-  continueText: { color: "#fff", fontWeight: "700", fontSize: 15.5 },
+  backBtn: { width: 28, height: 28, alignItems: "center", justifyContent: "center", marginLeft: -6 },
+  backChevron: { fontSize: 30, fontWeight: "400", lineHeight: 30 },
+  progress: { flexDirection: "row", alignItems: "center", gap: 5 },
+  seg: { height: 4, borderRadius: 2 },
+
+  scroll: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 12, paddingBottom: 16 },
+  eyebrow: { fontSize: 12, fontWeight: "700", letterSpacing: 1.4, textTransform: "uppercase", marginBottom: 8 },
+  title: { fontSize: 30, fontWeight: "800", letterSpacing: -0.6, lineHeight: 35, marginBottom: 10 },
+  subtitle: { fontSize: 15.5, lineHeight: 22, marginBottom: 26 },
+
+  footer: { paddingHorizontal: 24, paddingBottom: 10, paddingTop: 6 },
+  cta: { height: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  ctaText: { color: "#fff", fontWeight: "700", fontSize: 16.5, letterSpacing: 0.2 },
 });

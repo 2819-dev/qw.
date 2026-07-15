@@ -54,7 +54,7 @@ export const MAX_TOOLBAR_BUTTONS = 5;
 
 export const DEFAULT_PREFS: OnboardingPrefs = {
   displayName: "",
-  layout: "sidebar",
+  barPosition: "top",
   themeMode: "auto",
   spaces: [SPACE_PRESETS[0]],
   activeSpaceId: SPACE_PRESETS[0].id,

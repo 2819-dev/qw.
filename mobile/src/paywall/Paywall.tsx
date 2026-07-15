@@ -4,13 +4,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../state/appStore";
 import { useTheme } from "../theme/useTheme";
 import { activeSpace } from "../state/defaults";
-import BrowserPreview from "../ui/BrowserPreview";
+import PhonePreview from "../ui/PhonePreview";
+import Wordmark from "../ui/Wordmark";
 import TrialTimeline from "./TrialTimeline";
 
 const FEATURES = [
   "Unlimited spaces & colors",
   "Tab stacks that stay organized",
-  "Sidebar or top bar, your call",
+  "Bar on top or bottom, your call",
   "Sync every space across devices",
 ];
 
@@ -26,16 +27,19 @@ export default function Paywall() {
     <SafeAreaView style={[styles.flex, { backgroundColor: theme.bg }]} edges={["top", "bottom"]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.previewWrap}>
-          <BrowserPreview
+          <PhonePreview
             theme={theme}
-            layout={state.prefs.layout}
+            barPosition={state.prefs.barPosition}
             space={activeSpace(state.prefs)}
             spaces={state.prefs.spaces}
-            height={150}
+            height={186}
           />
         </View>
 
-        <Text style={[styles.eyebrow, { color: theme.accent }]}>Your qw is ready</Text>
+        <View style={styles.brandRow}>
+          <Wordmark size={18} color={theme.textMuted} dotColor={theme.accent} />
+          <Text style={[styles.eyebrow, { color: theme.accent }]}>Pro</Text>
+        </View>
         <Text style={[styles.title, { color: theme.text }]}>{name ? `Nicely done, ${name}.` : "Nicely done."}</Text>
         <Text style={[styles.subtitle, { color: theme.textMuted }]}>
           You've built your spaces exactly how you want them. Keep every Pro customization with a 7-day free
@@ -102,16 +106,16 @@ export default function Paywall() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   scroll: { padding: 24, paddingBottom: 40 },
-  previewWrap: { marginBottom: 20 },
+  previewWrap: { alignItems: "center", marginBottom: 22 },
+  brandRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 8 },
   eyebrow: {
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 1,
     textTransform: "uppercase",
     textAlign: "center",
-    marginBottom: 6,
   },
-  title: { fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 10 },
+  title: { fontSize: 28, fontWeight: "800", letterSpacing: -0.5, textAlign: "center", marginBottom: 10 },
   subtitle: { fontSize: 14.5, lineHeight: 20, textAlign: "center", marginBottom: 24 },
   features: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 22 },
   feature: {

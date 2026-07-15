@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import OnboardingLayout from "../OnboardingLayout";
-import BrowserPreview from "../../ui/BrowserPreview";
+import PhonePreview from "../../ui/PhonePreview";
 import { SPACE_PRESETS, activeSpace } from "../../state/defaults";
 import type { StepProps } from "./types";
 import type { Space } from "../../state/types";
@@ -38,14 +38,17 @@ export default function SpacesStep({ prefs, updatePrefs, theme, stepIndex, stepC
       stepCount={stepCount}
       eyebrow="Spaces"
       title="Set up your spaces."
-      subtitle="A space is its own world — own tabs, own color. Keep Work and Personal apart. Tap a space to preview its look; the whole browser recolors to match."
+      subtitle="A space is its own world — own tabs, own color. Tap one to preview it; the whole browser recolors to match."
+      header={
+        <View style={{ alignItems: "center", marginBottom: 4 }}>
+          <PhonePreview theme={theme} barPosition={prefs.barPosition} space={space} spaces={prefs.spaces} height={236} />
+        </View>
+      }
       onBack={onBack}
       onContinue={onNext}
     >
-      <BrowserPreview theme={theme} layout={prefs.layout} space={space} spaces={prefs.spaces} height={188} />
-
       <Text style={[styles.hint, { color: theme.textFaint }]}>
-        {prefs.spaces.length} of {MAX_SPACES} spaces · tap to add, hold-free tap a selected one to preview it
+        {prefs.spaces.length} of {MAX_SPACES} selected · tap a chosen space to preview it
       </Text>
 
       <View style={styles.grid}>

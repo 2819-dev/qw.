@@ -7,18 +7,26 @@ version (`../electron`, `../src`) is a separate, later phase of the same product
 
 ## What's here
 
-A Zen-inspired experience built around **spaces** — each a named, colored context (Work, Study, Personal…)
-that recolors the whole browser — plus **tab stacks** and a choice of **sidebar or top bar**.
+A premium, mobile-first experience built around **spaces** — each a named, colored context (Work, Study,
+Personal…) that recolors the browser — plus **tab stacks** and a **top-or-bottom search bar**. The visual
+system is tied to the `qw.` logo: near-black + off-white, heavy type, color used as a restrained accent.
 
-- `src/onboarding/` — welcome, layout (sidebar/top bar), spaces, appearance, toolbar, personalize, summary.
-  Every step shows a live realistic mini-browser (`src/ui/BrowserPreview.tsx`) that reflects the choice, so
-  people see how it actually looks instead of picking from abstract swatches.
-- `src/paywall/` — premium upsell with the day 1 / day 5 / day 7 trial timeline and an honest free exit.
-- `src/browser/` — the real shell: space switcher, essentials + tab stacks (`TabList`), a floating rounded
-  page area, and `react-native-webview`. The accent follows the active space.
+- `src/onboarding/` — welcome, search-bar position (top/bottom), spaces, appearance, toolbar, personalize,
+  summary. Every step renders a live **portrait phone mockup** (`src/ui/PhonePreview.tsx`) — status bar,
+  dynamic island, home indicator — so people see how it looks on an actual phone, not a desktop window.
+  Premium chrome via `OnboardingLayout` (wordmark, segmented progress, full-width CTA).
+- `src/paywall/` — `qw. Pro` upsell with a portrait preview and the honest day 1 / day 5 / day 7 trial
+  timeline plus a plain free exit.
+- `src/browser/` — the real shell: a chrome bar (spaces switcher + `AddressBar` with a tabs button) pinned
+  **top or bottom**, a floating rounded page, a `TabSheet` bottom sheet with essentials + tab stacks
+  (`TabList`), and `react-native-webview`. Accent follows the active space.
+- `src/ui/Wordmark.tsx` — the reusable `qw.` mark (heavy weight, tight tracking) used across the app.
 
-Theme accent is derived from the active space's color (`src/theme/useTheme.ts`). State persists via
-`@react-native-async-storage/async-storage` (key `qw.state.v2`).
+Theme accent derives from the active space's color (`src/theme/useTheme.ts`). State persists via
+`@react-native-async-storage/async-storage` (key `qw.state.v3`).
+
+> App-icon variants (different takes on the `qw.` mark, user-selectable) are a planned feature — the
+> `Wordmark` component is the seed of that system.
 
 ## Running it — free, no Apple Developer account needed
 

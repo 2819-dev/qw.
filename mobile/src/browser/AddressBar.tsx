@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import type { ToolbarButtonId, TrialStatus } from "../state/types";
+import type { ToolbarButtonId } from "../state/types";
 import type { Palette } from "../theme/useTheme";
 import { TOOLBAR_BUTTONS } from "../state/defaults";
 
@@ -13,9 +13,8 @@ interface AddressBarProps {
   canGoBack: boolean;
   canGoForward: boolean;
   isBookmarked: boolean;
-  trialStatus: TrialStatus;
-  trialLabel: string;
-  onTrialPress: () => void;
+  tabCount: number;
+  onTabsPress: () => void;
 }
 
 export default function AddressBar({
@@ -27,9 +26,8 @@ export default function AddressBar({
   canGoBack,
   canGoForward,
   isBookmarked,
-  trialStatus,
-  trialLabel,
-  onTrialPress,
+  tabCount,
+  onTabsPress,
 }: AddressBarProps) {
   const [draft, setDraft] = useState(url);
   useEffect(() => setDraft(url), [url]);
@@ -46,7 +44,7 @@ export default function AddressBar({
   }
 
   return (
-    <View style={[styles.bar, { backgroundColor: theme.bgElevated }]}>
+    <View style={styles.bar}>
       {buttons.map((id) => {
         const disabled = isDisabled(id);
         return (
@@ -69,36 +67,35 @@ export default function AddressBar({
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="go"
-        placeholder="Search or enter address"
+        placeholder="Search or type a URL"
         placeholderTextColor={theme.textFaint}
-        style={[styles.input, { backgroundColor: theme.bg, color: theme.text, borderColor: theme.border }]}
+        style={[styles.input, { backgroundColor: theme.bgElevated, color: theme.text, borderColor: theme.border }]}
       />
       <Pressable
-        onPress={onTrialPress}
-        style={[
-          styles.pill,
-          {
-            borderColor: trialStatus === "trialing" ? theme.accent : theme.border,
-            backgroundColor: theme.bgElevated2,
-          },
-        ]}
+        onPress={onTabsPress}
+        hitSlop={6}
+        style={[styles.tabsBtn, { borderColor: theme.text }]}
       >
-        <Text
-          style={[styles.pillText, { color: trialStatus === "trialing" ? theme.accent : theme.textMuted }]}
-          numberOfLines={1}
-        >
-          {trialLabel}
-        </Text>
+        <Text style={[styles.tabsCount, { color: theme.text }]}>{tabCount}</Text>
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bar: { flexDirection: "row", alignItems: "center", gap: 2, paddingHorizontal: 6, paddingVertical: 8 },
-  icon: { width: 22, height: 28, alignItems: "center", justifyContent: "center" },
-  iconText: { fontSize: 16 },
-  input: { flex: 1, minWidth: 0, borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 7, fontSize: 13, marginHorizontal: 2 },
-  pill: { flexShrink: 0, borderWidth: 1, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 6, maxWidth: 76 },
-  pillText: { fontSize: 10, fontWeight: "700" },
+  bar: { flexDirection: "row", alignItems: "center", gap: 3, paddingHorizontal: 4 },
+  icon: { width: 26, height: 34, alignItems: "center", justifyContent: "center" },
+  iconText: { fontSize: 18 },
+  input: {
+    flex: 1,
+    minWidth: 0,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 14.5,
+    marginHorizontal: 4,
+  },
+  tabsBtn: { width: 26, height: 26, borderRadius: 7, borderWidth: 2, alignItems: "center", justifyContent: "center" },
+  tabsCount: { fontSize: 11, fontWeight: "800" },
 });

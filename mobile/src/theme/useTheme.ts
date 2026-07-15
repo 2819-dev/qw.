@@ -16,24 +16,25 @@ export interface Palette {
   isDark: boolean;
 }
 
+// Neutrals pulled straight from the logo: near-black charcoal + clean off-white.
 const DARK: Omit<Palette, "accent" | "accentSoft" | "accentGlow" | "isDark"> = {
-  bg: "#0b0b0f",
-  bgElevated: "#17171f",
-  bgElevated2: "#1f1f2a",
-  border: "rgba(255,255,255,0.1)",
-  text: "#f2f2f7",
-  textMuted: "rgba(242,242,247,0.6)",
-  textFaint: "rgba(242,242,247,0.4)",
+  bg: "#0e0f12",
+  bgElevated: "#17181c",
+  bgElevated2: "#212329",
+  border: "rgba(255,255,255,0.07)",
+  text: "#f5f6f7",
+  textMuted: "rgba(245,246,247,0.55)",
+  textFaint: "rgba(245,246,247,0.3)",
 };
 
 const LIGHT: Omit<Palette, "accent" | "accentSoft" | "accentGlow" | "isDark"> = {
-  bg: "#f4f4f8",
+  bg: "#f5f5f6",
   bgElevated: "#ffffff",
-  bgElevated2: "#f0f0f5",
-  border: "rgba(10,10,20,0.1)",
-  text: "#16161d",
-  textMuted: "rgba(22,22,29,0.6)",
-  textFaint: "rgba(22,22,29,0.4)",
+  bgElevated2: "#ededf0",
+  border: "rgba(15,16,19,0.08)",
+  text: "#131417",
+  textMuted: "rgba(19,20,23,0.55)",
+  textFaint: "rgba(19,20,23,0.32)",
 };
 
 function withAlpha(hex: string, alpha: number): string {

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import OnboardingLayout from "../OnboardingLayout";
-import BrowserPreview from "../../ui/BrowserPreview";
+import PhonePreview from "../../ui/PhonePreview";
 import { activeSpace } from "../../state/defaults";
 import { paletteFor } from "../../theme/useTheme";
 import type { StepProps } from "./types";
@@ -22,11 +22,14 @@ export default function ThemeStep({ prefs, updatePrefs, theme, stepIndex, stepCo
       eyebrow="Appearance"
       title="Light or dark?"
       subtitle="Your space colors carry across both. Pick the base you live in most."
+      header={
+        <View style={{ alignItems: "center", marginBottom: 22 }}>
+          <PhonePreview theme={theme} barPosition={prefs.barPosition} space={space} spaces={prefs.spaces} height={236} />
+        </View>
+      }
       onBack={onBack}
       onContinue={onNext}
     >
-      <BrowserPreview theme={theme} layout={prefs.layout} space={space} spaces={prefs.spaces} height={188} />
-
       <View style={styles.row}>
         {MODES.map((mode) => {
           const selected = prefs.themeMode === mode.id;
@@ -58,7 +61,7 @@ export default function ThemeStep({ prefs, updatePrefs, theme, stepIndex, stepCo
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: "row", gap: 10, marginTop: 18 },
+  row: { flexDirection: "row", gap: 10 },
   card: { flex: 1, padding: 12, borderRadius: 14, borderWidth: 1.5, alignItems: "center" },
   swatch: { width: 40, height: 40, borderRadius: 10, borderWidth: 1, alignItems: "center", justifyContent: "center", marginBottom: 8 },
   swatchDot: { width: 14, height: 14, borderRadius: 7 },

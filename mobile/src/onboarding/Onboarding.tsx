@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 import { useAppStore } from "../state/appStore";
 import { useTheme } from "../theme/useTheme";
 import WelcomeStep from "./steps/WelcomeStep";
-import LayoutStep from "./steps/LayoutStep";
+import BarPositionStep from "./steps/BarPositionStep";
 import SpacesStep from "./steps/SpacesStep";
 import ThemeStep from "./steps/ThemeStep";
 import ToolbarStep from "./steps/ToolbarStep";
@@ -12,7 +12,7 @@ import type { StepProps } from "./steps/types";
 
 const STEPS: Array<ComponentType<StepProps>> = [
   WelcomeStep,
-  LayoutStep,
+  BarPositionStep,
   SpacesStep,
   ThemeStep,
   ToolbarStep,
