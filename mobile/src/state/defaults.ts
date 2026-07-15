@@ -59,6 +59,7 @@ export const DEFAULT_PREFS: OnboardingPrefs = {
   spaces: [SPACE_PRESETS[0]],
   activeSpaceId: SPACE_PRESETS[0].id,
   toolbarButtons: ["back", "forward", "reload", "share"],
+  appIconId: "default",
 };
 
 export const DEFAULT_STATE: PersistedState = {

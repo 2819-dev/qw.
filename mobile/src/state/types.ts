@@ -33,6 +33,7 @@ export interface OnboardingPrefs {
   spaces: Space[];
   activeSpaceId: string;
   toolbarButtons: ToolbarButtonId[];
+  appIconId: string;
 }
 
 export type AppPhase = "onboarding" | "paywall" | "browser";

@@ -3,7 +3,6 @@ import { useAppStore } from "../state/appStore";
 import { useTheme } from "../theme/useTheme";
 import WelcomeStep from "./steps/WelcomeStep";
 import BarPositionStep from "./steps/BarPositionStep";
-import SpacesStep from "./steps/SpacesStep";
 import ThemeStep from "./steps/ThemeStep";
 import ToolbarStep from "./steps/ToolbarStep";
 import PersonalizeStep from "./steps/PersonalizeStep";
@@ -13,7 +12,6 @@ import type { StepProps } from "./steps/types";
 const STEPS: Array<ComponentType<StepProps>> = [
   WelcomeStep,
   BarPositionStep,
-  SpacesStep,
   ThemeStep,
   ToolbarStep,
   PersonalizeStep,

@@ -10,9 +10,21 @@ interface SpaceSwitcherProps {
   /** Emoji-only pills (no names) — for the narrow expanded sidebar. */
   compact?: boolean;
   onSelect: (id: string) => void;
+  onAddSpace?: () => void;
+  /** Long-press a space to edit it (rename / recolor / delete). */
+  onEditSpace?: (id: string) => void;
 }
 
-export default function SpaceSwitcher({ theme, spaces, activeId, orientation, compact, onSelect }: SpaceSwitcherProps) {
+export default function SpaceSwitcher({
+  theme,
+  spaces,
+  activeId,
+  orientation,
+  compact,
+  onSelect,
+  onAddSpace,
+  onEditSpace,
+}: SpaceSwitcherProps) {
   const vertical = orientation === "vertical";
   const showNames = !vertical && !compact;
   return (
@@ -28,7 +40,8 @@ export default function SpaceSwitcher({ theme, spaces, activeId, orientation, co
         return (
           <Pressable
             key={s.id}
-            onPress={() => onSelect(s.id)}
+            onPress={() => (active && onEditSpace ? onEditSpace(s.id) : onSelect(s.id))}
+            onLongPress={() => onEditSpace?.(s.id)}
             style={[
               styles.space,
               {
@@ -47,9 +60,11 @@ export default function SpaceSwitcher({ theme, spaces, activeId, orientation, co
           </Pressable>
         );
       })}
-      <View style={[styles.add, { borderColor: theme.border }]}>
-        <Text style={[styles.addText, { color: theme.textFaint }]}>＋</Text>
-      </View>
+      {onAddSpace && (
+        <Pressable onPress={onAddSpace} style={[styles.add, { borderColor: theme.border }]}>
+          <Text style={[styles.addText, { color: theme.textFaint }]}>＋</Text>
+        </Pressable>
+      )}
     </ScrollView>
   );
 }

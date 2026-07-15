@@ -7,10 +7,12 @@ import { useTheme } from "../theme/useTheme";
 import AddressBar from "./AddressBar";
 import SpaceSwitcher from "./SpaceSwitcher";
 import TabSheet from "./TabSheet";
+import Settings from "../settings/Settings";
+import SpaceEditor from "./SpaceEditor";
 import { normalizeUrl } from "./urls";
-import { activeSpace, seedTabs } from "../state/defaults";
+import { activeSpace, seedTabs, SPACE_PRESETS } from "../state/defaults";
 import { getElapsedTrialDays, hasTrialEnded, TRIAL_LENGTH_DAYS } from "../state/trial";
-import type { Tab, ToolbarButtonId } from "../state/types";
+import type { Space, Tab, ToolbarButtonId } from "../state/types";
 
 function trialLabel(status: string, elapsed: number, ended: boolean): string {
   if (status === "subscribed") return "qw Pro";
@@ -38,6 +40,8 @@ export default function BrowserShell() {
   const [nav, setNav] = useState({ canGoBack: false, canGoForward: false });
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
   const [tabSheetOpen, setTabSheetOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null);
 
   const tabs = tabsBySpace[space.id] ?? [];
   const activeTabId = activeTabBySpace[space.id] ?? tabs[0]?.id ?? "";
@@ -55,6 +59,41 @@ export default function BrowserShell() {
 
   function switchSpace(id: string) {
     dispatch({ type: "UPDATE_PREFS", prefs: { activeSpaceId: id } });
+  }
+
+  function addSpace() {
+    const used = new Set(prefs.spaces.map((s) => s.id));
+    const preset = SPACE_PRESETS.find((p) => !used.has(p.id));
+    const next: Space =
+      preset ??
+      {
+        id: `space-${Date.now()}`,
+        name: "New Space",
+        emoji: "✨",
+        color: "#7c6cf6",
+        homepage: "https://www.google.com",
+      };
+    setTabsBySpace((prev) => ({ ...prev, [next.id]: seedTabs(next.id) }));
+    setActiveTabBySpace((prev) => ({ ...prev, [next.id]: seedTabs(next.id)[0].id }));
+    dispatch({ type: "UPDATE_PREFS", prefs: { spaces: [...prefs.spaces, next], activeSpaceId: next.id } });
+    setEditingSpaceId(next.id);
+  }
+
+  function saveSpace(id: string, patch: Partial<Space>) {
+    dispatch({
+      type: "UPDATE_PREFS",
+      prefs: { spaces: prefs.spaces.map((s) => (s.id === id ? { ...s, ...patch } : s)) },
+    });
+  }
+
+  function deleteSpace(id: string) {
+    if (prefs.spaces.length <= 1) return;
+    const remaining = prefs.spaces.filter((s) => s.id !== id);
+    dispatch({
+      type: "UPDATE_PREFS",
+      prefs: { spaces: remaining, activeSpaceId: prefs.activeSpaceId === id ? remaining[0].id : prefs.activeSpaceId },
+    });
+    setEditingSpaceId(null);
   }
 
   function switchTab(id: string) {
@@ -132,8 +171,17 @@ export default function BrowserShell() {
             activeId={space.id}
             orientation="horizontal"
             onSelect={switchSpace}
+            onAddSpace={addSpace}
+            onEditSpace={setEditingSpaceId}
           />
         </View>
+        <Pressable
+          onPress={() => setSettingsOpen(true)}
+          hitSlop={6}
+          style={[styles.gear, { borderColor: theme.border, backgroundColor: theme.bgElevated }]}
+        >
+          <Text style={{ color: theme.textMuted, fontSize: 15 }}>⚙</Text>
+        </Pressable>
         <Pressable
           onPress={() => dispatch({ type: "SET_PHASE", phase: "paywall" })}
           style={[
@@ -209,6 +257,24 @@ export default function BrowserShell() {
           onDismiss={() => setTabSheetOpen(false)}
         />
       )}
+
+      <Settings
+        visible={settingsOpen}
+        onDismiss={() => setSettingsOpen(false)}
+        onUpgrade={() => {
+          setSettingsOpen(false);
+          dispatch({ type: "SET_PHASE", phase: "paywall" });
+        }}
+      />
+
+      <SpaceEditor
+        theme={theme}
+        space={prefs.spaces.find((s) => s.id === editingSpaceId) ?? null}
+        canDelete={prefs.spaces.length > 1}
+        onSave={saveSpace}
+        onDelete={deleteSpace}
+        onDismiss={() => setEditingSpaceId(null)}
+      />
     </SafeAreaView>
   );
 }
@@ -219,6 +285,7 @@ const styles = StyleSheet.create({
   chrome: { paddingHorizontal: 12, paddingVertical: 8, gap: 8 },
   spacesRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   spacesScroller: { flex: 1, minWidth: 0 },
+  gear: { flexShrink: 0, width: 32, height: 32, borderRadius: 999, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   trialPill: { flexShrink: 0, borderWidth: 1, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 7 },
   trialText: { fontSize: 11.5, fontWeight: "700" },
 
