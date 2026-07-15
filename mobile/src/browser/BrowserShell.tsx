@@ -5,8 +5,7 @@ import { WebView, type WebViewNavigation } from "react-native-webview";
 import { useAppStore } from "../state/appStore";
 import { useTheme } from "../theme/useTheme";
 import AddressBar from "./AddressBar";
-import SpaceSwitcher from "./SpaceSwitcher";
-import TabSheet from "./TabSheet";
+import TabOverview from "./TabOverview";
 import Settings from "../settings/Settings";
 import SpaceEditor from "./SpaceEditor";
 import NewTabPage from "./NewTabPage";
@@ -73,7 +72,7 @@ export default function BrowserShell() {
         name: "New Space",
         emoji: "✨",
         color: "#7c6cf6",
-        homepage: "https://www.google.com",
+        homepage: NEW_TAB_URL,
       };
     setTabsBySpace((prev) => ({ ...prev, [next.id]: seedTabs(next.id) }));
     setActiveTabBySpace((prev) => ({ ...prev, [next.id]: seedTabs(next.id)[0].id }));
@@ -104,14 +103,17 @@ export default function BrowserShell() {
 
   function newTab() {
     const id = `${space.id}-n${Date.now()}`;
-    const tab: Tab = { id, title: "New Tab", url: space.homepage, pinned: false };
+    const tab: Tab = { id, title: "New Tab", url: NEW_TAB_URL, pinned: false };
     setTabsBySpace((prev) => ({ ...prev, [space.id]: [...(prev[space.id] ?? []), tab] }));
     setActiveTabBySpace((prev) => ({ ...prev, [space.id]: id }));
   }
 
   function closeTab(id: string) {
-    const remaining = tabs.filter((t) => t.id !== id);
-    if (remaining.length === 0) return;
+    let remaining = tabs.filter((t) => t.id !== id);
+    // Never leave a space with zero tabs — open a fresh new tab, Safari-style.
+    if (remaining.length === 0) {
+      remaining = [{ id: `${space.id}-n${Date.now()}`, title: "New Tab", url: NEW_TAB_URL, pinned: false }];
+    }
     setTabsBySpace((prev) => ({ ...prev, [space.id]: remaining }));
     if (activeTabId === id) {
       setActiveTabBySpace((prev) => ({ ...prev, [space.id]: remaining[0].id }));
@@ -166,40 +168,6 @@ export default function BrowserShell() {
 
   const chrome = (
     <View style={styles.chrome}>
-      <View style={styles.spacesRow}>
-        <View style={styles.spacesScroller}>
-          <SpaceSwitcher
-            theme={theme}
-            spaces={prefs.spaces}
-            activeId={space.id}
-            orientation="horizontal"
-            onSelect={switchSpace}
-            onAddSpace={addSpace}
-            onEditSpace={setEditingSpaceId}
-          />
-        </View>
-        <Pressable
-          onPress={() => setSettingsOpen(true)}
-          hitSlop={6}
-          style={[styles.gear, { borderColor: theme.border, backgroundColor: theme.bgElevated }]}
-        >
-          <Text style={{ color: theme.textMuted, fontSize: 15 }}>⚙</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => dispatch({ type: "SET_PHASE", phase: "paywall" })}
-          style={[
-            styles.trialPill,
-            { borderColor: trial.status === "trialing" ? theme.accent : theme.border, backgroundColor: theme.bgElevated },
-          ]}
-        >
-          <Text
-            style={[styles.trialText, { color: trial.status === "trialing" ? theme.accent : theme.textMuted }]}
-            numberOfLines={1}
-          >
-            {label}
-          </Text>
-        </Pressable>
-      </View>
       {activeTab && (
         <AddressBar
           theme={theme}
@@ -251,15 +219,36 @@ export default function BrowserShell() {
       )}
 
       {activeTab && (
-        <TabSheet
+        <TabOverview
           visible={tabSheetOpen}
           theme={theme}
-          space={space}
+          spaces={prefs.spaces}
+          activeSpace={space}
           tabs={tabs}
           activeTabId={activeTabId}
-          onSelect={switchTab}
-          onClose={closeTab}
+          wallpaperId={prefs.newTabWallpaperId}
+          trialing={trial.status === "trialing"}
+          trialLabel={label}
+          onSelectTab={switchTab}
+          onCloseTab={closeTab}
           onNewTab={newTab}
+          onSwitchSpace={switchSpace}
+          onAddSpace={() => {
+            setTabSheetOpen(false);
+            addSpace();
+          }}
+          onEditSpace={(id) => {
+            setTabSheetOpen(false);
+            setEditingSpaceId(id);
+          }}
+          onSettings={() => {
+            setTabSheetOpen(false);
+            setSettingsOpen(true);
+          }}
+          onUpgrade={() => {
+            setTabSheetOpen(false);
+            dispatch({ type: "SET_PHASE", phase: "paywall" });
+          }}
           onDismiss={() => setTabSheetOpen(false)}
         />
       )}
@@ -288,12 +277,7 @@ export default function BrowserShell() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
 
-  chrome: { paddingHorizontal: 12, paddingVertical: 8, gap: 8 },
-  spacesRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  spacesScroller: { flex: 1, minWidth: 0 },
-  gear: { flexShrink: 0, width: 32, height: 32, borderRadius: 999, borderWidth: 1, alignItems: "center", justifyContent: "center" },
-  trialPill: { flexShrink: 0, borderWidth: 1, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 7 },
-  trialText: { fontSize: 11.5, fontWeight: "700" },
+  chrome: { paddingHorizontal: 12, paddingVertical: 8 },
 
   pageWrap: { flex: 1, paddingHorizontal: 8, paddingVertical: 6 },
   pageCard: {
