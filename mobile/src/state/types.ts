@@ -34,6 +34,7 @@ export interface OnboardingPrefs {
   activeSpaceId: string;
   toolbarButtons: ToolbarButtonId[];
   appIconId: string;
+  newTabWallpaperId: string;
 }
 
 export type AppPhase = "onboarding" | "paywall" | "browser";

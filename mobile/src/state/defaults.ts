@@ -1,18 +1,26 @@
 import type { OnboardingPrefs, PersistedState, Space, Tab, ToolbarButton } from "./types";
 
-/** Curated spaces people pick from during onboarding (Zen-style: color + emoji + identity). */
+/** Sentinel URL for the native, minimalist qw new-tab page (not a real website). */
+export const NEW_TAB_URL = "qw://newtab";
+
+/** Curated spaces people pick from (Zen-style: color + emoji + identity). New tabs open the qw page. */
 export const SPACE_PRESETS: Space[] = [
-  { id: "personal", name: "Personal", emoji: "🏡", color: "#7c6cf6", homepage: "https://www.google.com" },
-  { id: "work", name: "Work", emoji: "💼", color: "#3aa8ff", homepage: "https://www.google.com" },
-  { id: "study", name: "Study", emoji: "📚", color: "#2fd6a5", homepage: "https://www.google.com" },
-  { id: "create", name: "Create", emoji: "🎨", color: "#ff6b5e", homepage: "https://www.google.com" },
-  { id: "play", name: "Play", emoji: "🎮", color: "#f5a623", homepage: "https://www.youtube.com" },
-  { id: "focus", name: "Focus", emoji: "🎯", color: "#e05299", homepage: "https://www.google.com" },
+  { id: "personal", name: "Personal", emoji: "🏡", color: "#7c6cf6", homepage: NEW_TAB_URL },
+  { id: "work", name: "Work", emoji: "💼", color: "#3aa8ff", homepage: NEW_TAB_URL },
+  { id: "study", name: "Study", emoji: "📚", color: "#2fd6a5", homepage: NEW_TAB_URL },
+  { id: "create", name: "Create", emoji: "🎨", color: "#ff6b5e", homepage: NEW_TAB_URL },
+  { id: "play", name: "Play", emoji: "🎮", color: "#f5a623", homepage: NEW_TAB_URL },
+  { id: "focus", name: "Focus", emoji: "🎯", color: "#e05299", homepage: NEW_TAB_URL },
 ];
 
-/** Seed tabs so a fresh space feels real — essentials (pinned) plus a stack of related tabs. */
+/**
+ * Seed tabs for a space. The active tab is a fresh qw new-tab (minimalist page),
+ * followed by a few pinned essentials and a stack — so it feels real without dumping
+ * you onto google.com.
+ */
 export function seedTabs(spaceId: string): Tab[] {
-  const common: Tab[] = [
+  const newTab: Tab = { id: `${spaceId}-new`, title: "New Tab", url: NEW_TAB_URL, pinned: false };
+  const essentials: Tab[] = [
     { id: `${spaceId}-e1`, title: "Search", url: "https://www.google.com", pinned: true },
     { id: `${spaceId}-e2`, title: "Mail", url: "https://mail.google.com", pinned: true },
     { id: `${spaceId}-e3`, title: "Calendar", url: "https://calendar.google.com", pinned: true },
@@ -22,22 +30,13 @@ export function seedTabs(spaceId: string): Tab[] {
       { id: "work-t1", title: "Docs", url: "https://docs.google.com", pinned: false, stack: "Project" },
       { id: "work-t2", title: "Sheets", url: "https://sheets.google.com", pinned: false, stack: "Project" },
       { id: "work-t3", title: "Drive", url: "https://drive.google.com", pinned: false, stack: "Project" },
-      { id: "work-t4", title: "Inbox", url: "https://mail.google.com", pinned: false },
     ],
     study: [
       { id: "study-t1", title: "Wikipedia", url: "https://www.wikipedia.org", pinned: false, stack: "Research" },
       { id: "study-t2", title: "Scholar", url: "https://scholar.google.com", pinned: false, stack: "Research" },
-      { id: "study-t3", title: "Notes", url: "https://keep.google.com", pinned: false },
-    ],
-    play: [
-      { id: "play-t1", title: "YouTube", url: "https://www.youtube.com", pinned: false },
-      { id: "play-t2", title: "Twitch", url: "https://www.twitch.tv", pinned: false },
     ],
   };
-  return [...common, ...(bySpace[spaceId] ?? [
-    { id: `${spaceId}-t1`, title: "New Tab", url: "https://www.google.com", pinned: false },
-    { id: `${spaceId}-t2`, title: "News", url: "https://news.google.com", pinned: false },
-  ])];
+  return [newTab, ...essentials, ...(bySpace[spaceId] ?? [])];
 }
 
 export const TOOLBAR_BUTTONS: ToolbarButton[] = [
@@ -60,6 +59,7 @@ export const DEFAULT_PREFS: OnboardingPrefs = {
   activeSpaceId: SPACE_PRESETS[0].id,
   toolbarButtons: ["back", "forward", "reload", "share"],
   appIconId: "default",
+  newTabWallpaperId: "auto",
 };
 
 export const DEFAULT_STATE: PersistedState = {

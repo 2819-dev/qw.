@@ -9,8 +9,9 @@ import SpaceSwitcher from "./SpaceSwitcher";
 import TabSheet from "./TabSheet";
 import Settings from "../settings/Settings";
 import SpaceEditor from "./SpaceEditor";
+import NewTabPage from "./NewTabPage";
 import { normalizeUrl } from "./urls";
-import { activeSpace, seedTabs, SPACE_PRESETS } from "../state/defaults";
+import { activeSpace, seedTabs, SPACE_PRESETS, NEW_TAB_URL } from "../state/defaults";
 import { getElapsedTrialDays, hasTrialEnded, TRIAL_LENGTH_DAYS } from "../state/trial";
 import type { Space, Tab, ToolbarButtonId } from "../state/types";
 
@@ -46,6 +47,7 @@ export default function BrowserShell() {
   const tabs = tabsBySpace[space.id] ?? [];
   const activeTabId = activeTabBySpace[space.id] ?? tabs[0]?.id ?? "";
   const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0];
+  const onNewTab = activeTab?.url === NEW_TAB_URL;
 
   const elapsed = getElapsedTrialDays(trial);
   const label = trialLabel(trial.status, elapsed, hasTrialEnded(trial));
@@ -118,8 +120,9 @@ export default function BrowserShell() {
 
   function navigateActive(target: string) {
     if (!activeTab) return;
+    // Updating the tab's url re-renders: a real URL mounts/steers the WebView,
+    // NEW_TAB_URL swaps back to the native new-tab page.
     patchTab(activeTab.id, { url: target });
-    webviewRef.current?.injectJavaScript(`window.location.href = ${JSON.stringify(target)}; true;`);
   }
 
   function handleNavigationChange(navState: WebViewNavigation) {
@@ -200,7 +203,7 @@ export default function BrowserShell() {
       {activeTab && (
         <AddressBar
           theme={theme}
-          url={activeTab.url}
+          url={onNewTab ? "" : activeTab.url}
           onNavigate={(next) => navigateActive(normalizeUrl(next))}
           buttons={prefs.toolbarButtons}
           onButtonPress={onButton}
@@ -216,16 +219,19 @@ export default function BrowserShell() {
 
   const page = (
     <View style={styles.pageWrap}>
-      <View style={[styles.pageCard, { backgroundColor: theme.bgElevated, borderColor: theme.border, shadowColor: space.color }]}>
-        {activeTab && (
-          <WebView<object>
-            key={`${space.id}:${activeTab.id}`}
-            ref={webviewRef}
-            source={{ uri: activeTab.url }}
-            style={styles.flex}
-            onNavigationStateChange={handleNavigationChange}
-          />
-        )}
+      <View style={[styles.pageCard, { backgroundColor: theme.bg, borderColor: theme.border, shadowColor: space.color }]}>
+        {activeTab &&
+          (onNewTab ? (
+            <NewTabPage theme={theme} wallpaperId={prefs.newTabWallpaperId} />
+          ) : (
+            <WebView<object>
+              key={`${space.id}:${activeTab.id}`}
+              ref={webviewRef}
+              source={{ uri: activeTab.url }}
+              style={styles.flex}
+              onNavigationStateChange={handleNavigationChange}
+            />
+          ))}
       </View>
     </View>
   );
